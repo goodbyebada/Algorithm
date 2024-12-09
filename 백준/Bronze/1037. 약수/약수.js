@@ -1,59 +1,19 @@
-/**
- * 약수
- * 브론즈 1
- */
+// var datas = require("fs")
+//   .readFileSync("/dev/stdin", "utf8")
+//   .toString()
+//   .split("\n");
 
-// function GCD(a, b) {
-//   let gcdA;
-//   let gcdB;
-
-//   if (a > b) {
-//     gcdA = a;
-//     gcdB = b;
-//   } else {
-//     gcdA = b;
-//     gcdB = a;
-//   }
-
-//   while (1) {
-//     let result = gcdA % gcdB;
-
-//     if (result == 0) {
-//       return gcdB;
-//     }
-
-//     gcdA = gcdB;
-//     gcdB = result;
-//   }
-// }
-
-// function LCM(b, a) {
-//   const gcd = GCD(a, b);
-//   return (a * b) / gcd;
-// }
-
-function main() {
-  const input = require("fs")
-    .readFileSync(process.platform === "linux" ? "/dev/stdin" : "./text.txt")
-    .toString()
-    .split("\n");
-
-  let max = -1;
-  let min = 1_000_000;
-
-  const findMaxAndMin = (a) => {
-    if (max < a) {
-      max = a;
-    }
-
-    if (min > a) {
-      min = a;
-    }
-  };
-
-  input[1].split(" ").map(Number).forEach(findMaxAndMin);
-
-  console.log(max * min);
+const datas = require("fs")
+  .readFileSync(process.platform === "linux" ? "/dev/stdin" : "./text.txt")
+  .toString()
+  .split("\n");
+const N = parseInt(datas[0]);
+let small = 1000005;
+let big = 0;
+let line = datas[1].split(" ");
+for (let i = 0; i < N; i++) {
+  let now = parseInt(line[i]);
+  if (now < small) small = now;
+  if (big < now) big = now;
 }
-
-main();
+console.log(small * big);
