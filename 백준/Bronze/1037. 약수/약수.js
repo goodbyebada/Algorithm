@@ -1,12 +1,8 @@
-// var datas = require("fs")
-//   .readFileSync("/dev/stdin", "utf8")
-//   .toString()
-//   .split("\n");
-
 const datas = require("fs")
-  .readFileSync(process.platform === "linux" ? "/dev/stdin" : "./text.txt")
+  .readFileSync("/dev/stdin", "utf8")
   .toString()
   .split("\n");
+
 const N = parseInt(datas[0]);
 let small = 1000005;
 let big = 0;
