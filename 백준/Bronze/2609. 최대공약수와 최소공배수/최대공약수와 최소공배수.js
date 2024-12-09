@@ -14,8 +14,5 @@ const [a, b] = require("fs")
   .split(" ")
   .map(Number);
 
-const gcd = GCD(a, b);
-const lcm = (a * b) / gcd;
-
-console.log(gcd);
-console.log(lcm);
+console.log(GCD(a, b));
+console.log((a * b) / GCD(a, b));
