@@ -42,8 +42,13 @@ function main() {
   let min = 1_000_000;
 
   const findMaxAndMin = (a) => {
-    max = max > a ? max : a;
-    min = min < a ? min : a;
+    if (max < a) {
+      max = a;
+    }
+
+    if (min > a) {
+      min = a;
+    }
   };
 
   input[1].split(" ").map(Number).forEach(findMaxAndMin);
