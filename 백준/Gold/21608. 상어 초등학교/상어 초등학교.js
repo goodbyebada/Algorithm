@@ -1,27 +1,81 @@
-const { listenerCount } = require("process");
-
 /**
- * 다른 사람 코드
- * 출처 :https://chamdom.blog/boj-21608/
+ * 1등 코드
  */
-const input = require("fs")
-  .readFileSync(process.platform === "linux" ? "/dev/stdin" : "./input.txt")
-  .toString()
-  .trim()
-  .split("\n");
 
-const N = parseInt(input.shift(), 10);
-const students = input.map((line) => line.split(" ").map(Number));
+const fs = require("fs");
+const filePath = process.platform === "linux" ? "/dev/stdin" : "input.txt";
+const input = fs.readFileSync(filePath).toString().trim().split("\n");
+const n = Number(input.shift());
 
-const board = Array.from({ length: N }, () => Array(N).fill(null));
-const likes = Array.from({ length: N * N + 1 }, () => []);
+const studentInfoList = input.map((row) => row.split(" ").map(Number));
+const space = Array.from(Array(n), () => Array(n).fill(0));
 
-const directions = [
-  [-1, 0],
-  [1, 0],
-  [0, -1],
-  [0, 1],
-];
+const drow = [0, 1, 0, -1];
+const dcol = [1, 0, -1, 0];
+
+const isRange = (row, col) => {
+  return 0 <= row && row < n && 0 <= col && col < n;
+};
+
+const findBestPosition = (student, friendList) => {
+  let maxLike = -1;
+  let maxEmpty = -1;
+  let bestPosition = null;
+
+  for (let row = 0; row < n; row++) {
+    for (let col = 0; col < n; col++) {
+      if (space[row][col] !== 0) {
+        continue;
+      }
+
+      let likeCount = 0;
+      let emptyCount = 0;
+
+      for (let i = 0; i < 4; i++) {
+        const nrow = row + drow[i];
+        const ncol = col + dcol[i];
+
+        if (!isRange(nrow, ncol)) {
+          continue;
+        }
+
+        if (space[nrow][ncol] === 0) {
+          emptyCount++;
+        }
+
+        if (friendList.includes(space[nrow][ncol])) {
+          likeCount++;
+        }
+      }
+
+      if (
+        maxLike < likeCount ||
+        (maxLike === likeCount && maxEmpty < emptyCount)
+      ) {
+        maxLike = likeCount; // 수정된 부분
+        maxEmpty = emptyCount;
+        bestPosition = [row, col];
+      }
+    }
+  }
+
+  if (bestPosition) {
+    const [row, col] = bestPosition;
+    space[row][col] = student;
+  }
+};
+
+const map = {};
+for (const [studentInfo, ...friendList] of studentInfoList) {
+  map[studentInfo] = friendList;
+  //   map update
+  //  boj21608_ans는 likes 배열을 만들어했는데, 여기는 map 사용
+  //   나머지 로직은 다 동일함
+
+  findBestPosition(studentInfo, friendList);
+}
+
+let ans = 0;
 
 const scores = {
   0: 0,
@@ -31,90 +85,29 @@ const scores = {
   4: 1000,
 };
 
-// 좌표 유효성 검사
-function isValid(x, y) {
-  return x >= 0 && x < N && y >= 0 && y < N;
-}
+for (let row = 0; row < n; row++) {
+  for (let col = 0; col < n; col++) {
+    const student = space[row][col];
 
-// 한 case에 대한 수행
-function arrageStudent(student, likeFriends) {
-  let maxLikes = -1;
-  let maxEmpty = -1;
-  let bestPosition = null;
-
-  for (let r = 0; r < N; r++) {
-    for (let c = 0; c < N; c++) {
-      // 값이 존재한다면 continue
-      if (board[r][c] !== null) continue;
-
-      let likeCount = 0;
-      let emptyCount = 0;
-
-      //상하좌우에 대한 확인
-      //   emptyCount : 비어있는 칸의 개수
-      //   likeCount : 해당 좌표의 (nr,nc)의 상하좌우의 좋아하는 학생 개수
-      for (const [dr, dc] of directions) {
-        const nr = r + dr;
-        const nc = c + dc;
-
-        if (!isValid(nr, nc)) continue;
-        if (board[nr][nc] === null) emptyCount++;
-        if (likeFriends.includes(board[nr][nc])) likeCount++;
-      }
-
-      if (
-        likeCount > maxLikes ||
-        (likeCount === maxLikes && emptyCount > maxEmpty)
-      ) {
-        // likeCount === maxLikes
-        // 좋아하는 학생의 개수를 우선한다.
-        // 만약 같다면, emptyCount를 기준으로 센다
-
-        // 업데이트
-        maxLikes = likeCount;
-        maxEmpty = emptyCount;
-
-        // 매번 업데이트 🌟
-        bestPosition = [r, c];
-      }
-    }
-  }
-
-  //  최종 bestPostion 확정
-  const [bestR, bestC] = bestPosition;
-  board[bestR][bestC] = student;
-}
-
-//  ✨ for문에서 student ...likeFriends로 바로 접근할 수 있다.
-// 굳이 splice || shift 사용안해도 된다.
-
-//모든 studentsCase에 대해 수행한다.
-for (const [student, ...likeFriends] of students) {
-  likes[student] = likeFriends;
-  arrageStudent(student, likeFriends);
-}
-
-let answer = 0;
-
-// 만족도 계산 로직
-for (let r = 0; r < N; r++) {
-  for (let c = 0; c < N; c++) {
-    const student = board[r][c];
-    const likeFriends = likes[student];
+    // ✨map 사용해 접근함
+    const friendList = map[student];
     let likeCount = 0;
 
-    // 확정 좌표의 상하좌우에  접근해 likeFreinds의 count를 센다.
-    for (const [dr, dc] of directions) {
-      const nr = r + dr;
-      const nc = c + dc;
+    for (let i = 0; i < 4; i++) {
+      const nrow = row + drow[i];
+      const ncol = col + dcol[i];
 
-      //   범위가 유효하고 likeFriends에 포함될때
-      if (isValid(nr, nc) && likeFriends.includes(board[nr][nc])) {
+      if (!isRange(nrow, ncol)) {
+        continue;
+      }
+
+      if (friendList.includes(space[nrow][ncol])) {
         likeCount++;
       }
     }
-    answer += scores[likeCount];
+
+    ans += scores[likeCount];
   }
 }
 
-console.log(answer);
+console.log(ans);
