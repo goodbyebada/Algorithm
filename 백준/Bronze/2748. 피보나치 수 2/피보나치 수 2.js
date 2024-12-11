@@ -2,6 +2,8 @@
  * 피보나치 수 2
  * 3:59~
  *
+ *
+ * BigInt
  */
 
 const input = require("fs")
@@ -9,24 +11,11 @@ const input = require("fs")
   .toString()
   .trim();
 
-let n = +input - 1;
+const n = +input;
+const dp = [0, 1];
 
-let n0 = BigInt(0);
-let n1 = BigInt(1);
-
-if (+input === 0) {
-  console.log(n0.toString());
-  return;
+for (let i = 2; i <= n; i++) {
+  dp[i] = BigInt(dp[i - 1]) + BigInt(dp[i - 2]);
 }
 
-if (+input === 1) {
-  console.log(n1.toString());
-  return;
-}
-
-while (n--) {
-  let tmp = BigInt(n0) + BigInt(n1);
-  n0 = n1;
-  n1 = tmp;
-}
-console.log(n1.toString());
+console.log(dp[n].toString());
