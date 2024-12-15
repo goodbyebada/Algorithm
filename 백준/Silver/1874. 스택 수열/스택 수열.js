@@ -1,9 +1,12 @@
-const [n, ...targetList] = require("fs")
-  .readFileSync(process.platform === "linux" ? "/dev/stdin" : "./input.txt")
+let fs = require("fs");
+let input = fs
+  .readFileSync(process.platform === "linux" ? "/dev/stdin" : "input.txt")
   .toString()
   .trim()
-  .split("\n")
-  .map(Number);
+  .split("\n");
+
+const n = parseInt(input[0]);
+const targetList = input.slice(1).map(Number);
 
 //   마지막에 stack에 push한 값
 let current = 1;
