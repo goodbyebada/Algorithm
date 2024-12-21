@@ -5,5 +5,4 @@ let input = require("fs")
   .split(" ")
   .map(Number);
 
-input.sort((a, b) => a - b);
-console.log(input[input.length - 2]);
+console.log(input.sort((a, b) => a - b)[1]);
