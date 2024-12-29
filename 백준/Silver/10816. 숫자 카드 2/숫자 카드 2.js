@@ -1,29 +1,22 @@
-const filePath = process.platform === "linux" ? "/dev/stdin" : "./input.txt";
-const input = require("fs")
-  .readFileSync(filePath)
-  .toString()
-  .trim()
-  .split("\n");
+const main = () => {
+    const input = require('fs').readFileSync('dev/stdin').toString().trim().split("\n").map(i => i.trim());
 
-const cards = input[1].split(" ").map((elem) => +elem);
-const findList = input[3].split(" ").map((elem) => +elem);
-const result = [];
-const map = new Map();
+    const cards = input[1].split(" ").map(Number);
+    const nums = input[3].split(" ").map(Number);
 
-for (let i = 0; i < cards.length; i++) {
-  const num = cards[i];
-  if (map.has(num)) {
-    map.set(num, map.get(num) + 1);
-  } else map.set(num, 1);
+    let map = new Map();
+
+    cards.forEach(v => {
+        if (!map.has(v)) {
+            map.set(v, 1);
+        } else {
+            map.set(v, map.get(v) + 1);
+        }
+    })
+
+    console.log(nums.map(v => {
+        if (!map.has(v)) return 0;
+        else return map.get(v);
+    }).join(" "));
 }
-
-for (let i = 0; i < findList.length; i++) {
-  const findNum = findList[i];
-  if (map.has(findNum)) {
-    result.push(map.get(findNum));
-  } else {
-    result.push(0);
-  }
-}
-
-console.log(result.join(" "));
+main();
