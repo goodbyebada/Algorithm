@@ -10,29 +10,25 @@
  * K (수강 가능 인원) 	L (신청 학생의 수 )
  * 마지막 클릭한 순서가 들어가야한다.
  *
- *
  * */
 
 const path = process.platform === "linux" ? "/dev/stdin" : "./input.txt";
 const input = require("fs").readFileSync(path).toString().trim().split("\n");
 const [K, L] = input[0].split(" ").map(Number);
-const codeIdxMap = new Map();
+const map = new Map();
+let answer = [];
 
 for (let i = 1; i <= L; i++) {
   const code = input[i];
-  codeIdxMap.set(code, i);
+  if (map.has(code)) map.delete(code);
+  map.set(code);
 }
 
-let list = [];
-for (let [code, idx] of codeIdxMap) {
-  list.push([code, idx]);
-}
-list = list.sort((a, b) => a[1] - b[1]);
-
-let answer = [];
-for (let i = 0; i < list.length; i++) {
-  if (i === K) break;
-  answer.push(list[i][0]);
+let cnt = 0;
+for (const item of map) {
+  if (cnt === K) break;
+  answer.push(item[0]);
+  cnt++;
 }
 
 console.log(answer.join("\n"));
