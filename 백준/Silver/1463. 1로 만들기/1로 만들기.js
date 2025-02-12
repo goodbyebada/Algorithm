@@ -1,20 +1,42 @@
-// 연산을 사용하는 횟수의 최솟값을 구해라
+/**
+ * 1. 정신 나갔나? BFS 푸는데 visited 방문 체킹을 안 했다.
+ * 2. DP를 사용하면 더 빠르게 풀 수 있다. idx 값 val 최솟값
+ */
 
+// 연산을 사용하는 횟수의 최솟값을 구해라
 const path = process.platform === "linux" ? "/dev/stdin" : "./input.txt";
 const input = require("fs").readFileSync(path).toString().trim();
 
-BFS(+input);
+DP(+input);
+// BFS(+input);
 
-// TODO 메모리 초과  + 시간초과
-//  워스트 케이스 시간 복잡도 찾기
-// 중복되는 값이 너무 많다 => 배열을 만들어서 방문 횟수 기록 1이 채워진다면 출력, 이미 방문한 횟수보다 크다면 건너 뛴다.
+function DP(N) {
+  const dp = new Array(N + 1).fill(0);
 
+  for (let idx = 2; idx <= N; idx++) {
+    dp[idx] = dp[idx - 1] + 1;
+
+    if (idx % 2 === 0) {
+      dp[idx] = Math.min(dp[idx], dp[idx / 2] + 1);
+    }
+
+    if (idx % 3 === 0) {
+      dp[idx] = Math.min(dp[idx], dp[idx / 3] + 1);
+    }
+  }
+
+  console.log(dp[N]);
+}
+
+/**
+ * 중복되는 값 visited 체크를 통해 제거
+ * @param {*} N
+ */
 function BFS(N) {
   let index = 0;
   const queue = [[1, 0]];
   const visited = new Array(N + 1).fill(false);
   visited[1] = true;
-  let answer = [];
 
   while (index < queue.length) {
     let [val, count] = queue[index++];
@@ -32,7 +54,4 @@ function BFS(N) {
       visited[num] = true;
     }
   }
-
-  // console.log(Math.min(...answer));
 }
-
