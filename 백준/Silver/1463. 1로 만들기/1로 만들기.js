@@ -7,11 +7,14 @@
 const path = process.platform === "linux" ? "/dev/stdin" : "./input.txt";
 const input = require("fs").readFileSync(path).toString().trim();
 
-DP(+input);
+BFS(+input);
 // BFS(+input);
 
 function DP(N) {
   const dp = new Array(N + 1).fill(0);
+  const visited = new Array(N + 1).fill(false);
+
+  visited[N] = true;
 
   for (let idx = 2; idx <= N; idx++) {
     dp[idx] = dp[idx - 1] + 1;
@@ -34,24 +37,30 @@ function DP(N) {
  */
 function BFS(N) {
   let index = 0;
-  const queue = [[1, 0]];
-  const visited = new Array(N + 1).fill(false);
-  visited[1] = true;
+  const queue = [[N, 0]];
+  const visited = new Set();
+  visited.add(N);
 
   while (index < queue.length) {
     let [val, count] = queue[index++];
 
-    if (val === N) {
+    if (val === 1) {
       console.log(count);
       break;
     }
-    const list = [val + 1, val * 2, val * 3];
 
-    for (let num of list) {
-      if (num > N) continue;
-      if (visited[num]) continue;
-      queue.push([num, count + 1]);
-      visited[num] = true;
+    if (val % 2 === 0 && !visited.has(val % 2)) {
+      queue.push([val / 2, count + 1]);
+      visited.add(val / 2);
+    }
+    if (val % 3 === 0 && !visited.has(val % 3)) {
+      queue.push([val / 3, count + 1]);
+      visited.add(val / 3);
+    }
+
+    if (!visited.has(val - 1)) {
+      queue.push([val - 1, count + 1]);
+      visited.add(val - 1);
     }
   }
 }
