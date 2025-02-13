@@ -1,12 +1,12 @@
-const input = require("fs")
-  .readFileSync(process.platform === "linux" ? "/dev/stdin" : "./input.txt")
-  .toString()
-  .trim();
+function solution() {
+  const fs = require('fs');
+  const input = fs.readFileSync('/dev/stdin').toString().trim().split('\n');
+  
+  const n = +input[0];
+  
+  if (n % 2) console.log("SK");
+  else console.log("CY");
 
-const N = +input;
-
-if (N % 2 === 0) {
-  console.log("CY");
-} else {
-  console.log("SK");
 }
+
+solution();
