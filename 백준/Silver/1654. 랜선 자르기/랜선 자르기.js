@@ -31,15 +31,15 @@ const path = process.platform === "linux" ? "/dev/stdin" : "./input.txt";
 const input = require("fs").readFileSync(path).toString().trim().split("\n");
 
 const [K, N] = input.shift().split(" ").map(Number);
-const sortedInput = input.map(Number).sort((a, b) => a - b);
-const max = sortedInput[sortedInput.length - 1];
+const list = input.map(Number);
 
-bsLowerCase(N, input, max);
+const max = Math.max(...list);
+
+bsLowerCase(N, list, max);
 
 function bsLowerCase(N, input, max) {
-  // length 0 ~ max 길이까지
-
-  let start = 0;
+  // 1부터
+  let start = 1;
   let end = max;
 
   while (start <= end) {
