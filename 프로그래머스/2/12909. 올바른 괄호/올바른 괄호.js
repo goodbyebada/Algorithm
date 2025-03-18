@@ -1,26 +1,13 @@
 function solution(s){
-
+    let cum = 0
     
-    const queue = []
-    const list = s.split("")
-    let idx = 0;
-    
-    for(const item of list){
-        if(item == "("){
-            queue.push('(')
-        }else{
-            if(!queue[idx]){
-                return false;
-            }
-            idx++;
+    for (let paren of s) {
+        cum += paren === '('? 1: -1
+        
+        if(cum < 0) {
+            return false
         }
     }
-        
-    if(queue[idx]){
-        return false;
-    }
-    
-    return true;
-        
+    return cum === 0? true: false;
 }
-    
+
