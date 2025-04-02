@@ -1,83 +1,54 @@
 //  소수의 연속 합
 
-/**
- * 1. 연속된 소수의 합으로 자연수를 나타내야한다.
- *
- * 자연수가 주어졌을대, 연속된 소수의 합 경우의 수를 구해야한다.
- *
- *
- */
-
 const path = process.platform === "linux" ? "/dev/stdin" : "./input.txt";
 const input = +require("fs").readFileSync(path).toString().trim();
 
 // 에라토스테네스의 체 알고리즘
-function getIsDemicalList(num) {
-  const isDemical = new Array(num + 1).fill(true);
-  //   0과 1은 사용 X
+function getPrimeList(num) {
+  const isPrime = new Array(num + 1).fill(true);
+  //  쓰지 않는 수는 명시적으로 false 처리한다.
+  isPrime[0] = isPrime[1] = false;
+  const prime = [];
 
-  for (let i = 2; i <= Math.sqrt(num); i++) {
-    // 남은 수인 경우 (소수인 경우)
-    if (isDemical[i]) {
-      let j = 2;
-      while (i * j <= num) {
-        if (isDemical[i * j]) isDemical[i * j] = false;
-        j++;
+  for (let i = 2; i <= num; i++) {
+    if (isPrime[i]) {
+      prime.push(i);
+      for (let j = i * i; j <= num; j += i) {
+        isPrime[j] = false;
       }
     }
   }
-  return isDemical;
+
+  return prime;
 }
 
-function nextVal(sosuList, curIdx) {
-  for (let idx = curIdx + 1; idx < sosuList.length; idx++) {
-    if (sosuList[idx]) {
-      return idx;
-    }
-  }
-
-  return sosuList.length;
-}
-
-function twoPointerProcess(sosuList, num, count) {
-  let start = 2;
-  let end = 2;
+function twoPointerProcess(prime, num, count) {
+  let start = 0;
+  let end = 0;
   let sum = 0;
 
-  //  sum > num start가 움직인다.
-  //  sum < num 일 때 end가 움직인다.
-  //   end len-1이고 sum < num이라면 break
-  //
-  //   start 가 len -1이라면 break -> 같은 방향으로
-
-  while (1) {
+  // break를 없애고 while 조건에서 종료 조건을 직접 설정
+  while (start <= end && end <= prime.length) {
     if (sum === num) count++;
 
     if (sum < num) {
-      if (end === sosuList.length) break;
-
-      sum += end;
-
-      end = nextVal(sosuList, end);
-      //   더하고 나서도 작다면 end == len이 되기  때문에 break
+      sum += prime[end];
+      end++;
     } else {
-      if (start === sosuList.length) break;
-      sum -= start;
-      start = nextVal(sosuList, start);
+      sum -= prime[start];
+      start++;
     }
   }
 
   return count;
 }
 
-function sol() {
+function sol(input) {
   let count = 0;
-  let sosuList = [];
+  const prime = getPrimeList(input);
 
-  sosuList = getIsDemicalList(input);
-
-  count = twoPointerProcess(sosuList, input, count);
+  count = twoPointerProcess(prime, input, count);
   console.log(count);
 }
 
-sol();
+sol(input);
