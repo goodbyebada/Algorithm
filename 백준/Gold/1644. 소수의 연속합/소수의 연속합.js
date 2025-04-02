@@ -15,27 +15,31 @@ const input = +require("fs").readFileSync(path).toString().trim();
 function getIsDemicalList(num) {
   const isDemical = new Array(num + 1).fill(true);
   //   0과 1은 사용 X
+
   for (let i = 2; i <= Math.sqrt(num); i++) {
-    // i*i로 시작하면 중복된 숫자를 제외할 수 있다.
-    for (let j = i * i; j <= num; j += i) {
-      isDemical[j] = false;
+    // 남은 수인 경우 (소수인 경우)
+    if (isDemical[i]) {
+      let j = 2;
+      while (i * j <= num) {
+        if (isDemical[i * j]) isDemical[i * j] = false;
+        j++;
+      }
     }
   }
-
   return isDemical;
 }
 
-function nextVal(isDemical, curIdx) {
-  for (let idx = curIdx + 1; idx < isDemical.length; idx++) {
-    if (isDemical[idx]) {
+function nextVal(sosuList, curIdx) {
+  for (let idx = curIdx + 1; idx < sosuList.length; idx++) {
+    if (sosuList[idx]) {
       return idx;
     }
   }
 
-  return isDemical.length;
+  return sosuList.length;
 }
 
-function twoPointerProcess(isDemical, num, count) {
+function twoPointerProcess(sosuList, num, count) {
   let start = 2;
   let end = 2;
   let sum = 0;
@@ -50,16 +54,16 @@ function twoPointerProcess(isDemical, num, count) {
     if (sum === num) count++;
 
     if (sum < num) {
-      if (end === isDemical.length) break;
+      if (end === sosuList.length) break;
 
       sum += end;
 
-      end = nextVal(isDemical, end);
+      end = nextVal(sosuList, end);
       //   더하고 나서도 작다면 end == len이 되기  때문에 break
     } else {
-      if (start === isDemical.length) break;
+      if (start === sosuList.length) break;
       sum -= start;
-      start = nextVal(isDemical, start);
+      start = nextVal(sosuList, start);
     }
   }
 
@@ -68,11 +72,11 @@ function twoPointerProcess(isDemical, num, count) {
 
 function sol() {
   let count = 0;
-  let isDemical = [];
+  let sosuList = [];
 
-  isDemical = getIsDemicalList(input);
+  sosuList = getIsDemicalList(input);
 
-  count = twoPointerProcess(isDemical, input, count);
+  count = twoPointerProcess(sosuList, input, count);
   console.log(count);
 }
 
