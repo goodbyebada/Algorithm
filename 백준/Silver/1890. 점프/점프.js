@@ -10,19 +10,21 @@
  *
  */
 
+// 1H 15M
 const path = process.platform === "linux" ? "/dev/stdin" : "./input.txt";
-const [line, ...rest] = require("fs")
-  .readFileSync(path)
-  .toString()
-  .trim()
-  .split("\n");
+const inputs = require("fs").readFileSync(path).toString().trim().split("\n");
 
-const N = Number(line);
+const N = +inputs[0];
 
-const map = rest.map((elem) => elem.split(" ").map(Number));
+const map = [];
 
-const visted = new Array(N).fill(0).map(() => new Array(N).fill(false));
-const dp = new Array(N).fill(0).map(() => new Array(N).fill(BigInt(0)));
+for (let i = 1; i <= N; i++) {
+  map.push(inputs[i].split(" ").map(Number));
+}
+
+const dp = Array(N)
+  .fill(0)
+  .map(() => Array(N).fill(BigInt(0)));
 
 //1. 가장 오른쪽 아래칸에서 시작해 Map을 순회한다. [N-1][N-1]
 // 2. 각 칸의 숫자만큼 왼쪽 오른쪽 이동한다.
@@ -35,18 +37,16 @@ function isValid(num) {
   return 0 <= num && num < N;
 }
 
-function canVisit(prev, moved, visited, dp) {
+function canVisit(prev, moved, dp) {
   const [prevX, prevY] = prev;
   const [currX, currY] = moved;
 
   if (currX === N - 1 && currY === N - 1) {
-    visited[prevX][prevY] = true;
     dp[prevX][prevY] = BigInt(dp[prevX][prevY]) + BigInt(1);
     return;
   }
 
-  if (visited[currX][currY]) {
-    visited[prevX][prevY] = true;
+  if (dp[currX][currY] > 0n) {
     dp[prevX][prevY] = BigInt(dp[prevX][prevY]) + BigInt(dp[currX][currY]);
     return;
   }
@@ -69,11 +69,11 @@ function update() {
 
         if (isValid(newY)) {
           const moved = [x, newY];
-          canVisit(prev, moved, visted, dp);
+          canVisit(prev, moved, dp);
         }
         if (isValid(newX)) {
           const moved = [newX, y];
-          canVisit(prev, moved, visted, dp);
+          canVisit(prev, moved, dp);
         }
       }
     }
@@ -83,8 +83,7 @@ function update() {
 function sol() {
   update();
 
-console.log(dp[0][0].toString());
-
+  console.log(dp[0][0].toString());
 }
 
 sol();
