@@ -24,7 +24,7 @@ for (let i = 1; i <= N; i++) {
 
 const dp = Array(N)
   .fill(0)
-  .map(() => Array(N).fill(BigInt(0)));
+  .map(() => Array(N).fill(0n));
 
 //1. 가장 오른쪽 아래칸에서 시작해 Map을 순회한다. [N-1][N-1]
 // 2. 각 칸의 숫자만큼 왼쪽 오른쪽 이동한다.
@@ -42,12 +42,12 @@ function canVisit(prev, moved, dp) {
   const [currX, currY] = moved;
 
   if (currX === N - 1 && currY === N - 1) {
-    dp[prevX][prevY] = BigInt(dp[prevX][prevY]) + BigInt(1);
+    dp[prevX][prevY] += 1n;
     return;
   }
 
   if (dp[currX][currY] > 0n) {
-    dp[prevX][prevY] = BigInt(dp[prevX][prevY]) + BigInt(dp[currX][currY]);
+    dp[prevX][prevY] += dp[currX][currY];
     return;
   }
 }
