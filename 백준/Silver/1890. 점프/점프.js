@@ -26,56 +26,35 @@ const dp = Array(N)
   .fill(0)
   .map(() => Array(N).fill(0n));
 
+dp[0][0] = 1n;
+
+// 이전에 했던 방법
 //1. 가장 오른쪽 아래칸에서 시작해 Map을 순회한다. [N-1][N-1]
 // 2. 각 칸의 숫자만큼 왼쪽 오른쪽 이동한다.
 // 0을 만난다면 true 처리를 한다. -> dp에 true count 기록 || visted [x][y] === true이면 +dp[x][y]
 // 아니라면 continue
 // 순회하고 난 뒤  dp[0][0]을 출력한다.
 
-// 이동한 좌표 나갔는지 검사
-function isValid(num) {
-  return 0 <= num && num < N;
-}
-
-function canVisit(prev, moved, dp) {
-  const [prevX, prevY] = prev;
-  const [currX, currY] = moved;
-
-  if (currX === N - 1 && currY === N - 1) {
-    dp[prevX][prevY] += 1n;
-    return;
-  }
-
-  if (dp[currX][currY] > 0n) {
-    dp[prevX][prevY] += dp[currX][currY];
-    return;
-  }
-}
+// refactor
+// 순방향이 더 빠르다!
+// 역방향으로 하면 출발 지점이 거쳐가지 않는 좌표도 방문해야한다.
 
 function update() {
-  for (let x = N - 1; x >= 0; x--) {
-    for (let y = N - 1; y >= 0; y--) {
+  for (let x = 0; x < N; x++) {
+    for (let y = 0; y < N; y++) {
       // 0일 때 제외
+      if (map[x][y] === 0) continue;
 
-      if (map[x][y] > 0) {
-        const prev = [x, y];
-        const moveCount = map[x][y];
+      const moveCount = map[x][y];
 
-        // 오른쪽 -> 열이 바뀜
-        const newY = y + moveCount;
+      // 오른쪽 -> 열이 바뀜
+      const newY = y + moveCount;
 
-        // 아래 -> 행 바뀜
-        const newX = x + moveCount;
+      // 아래 -> 행 바뀜
+      const newX = x + moveCount;
 
-        if (isValid(newY)) {
-          const moved = [x, newY];
-          canVisit(prev, moved, dp);
-        }
-        if (isValid(newX)) {
-          const moved = [newX, y];
-          canVisit(prev, moved, dp);
-        }
-      }
+      if (0 <= newY && newY < N) dp[x][newY] += dp[x][y];
+      if (0 <= newX && newX < N) dp[newX][y] += dp[x][y];
     }
   }
 }
@@ -83,7 +62,7 @@ function update() {
 function sol() {
   update();
 
-  console.log(dp[0][0].toString());
+  console.log(dp[N - 1][N - 1].toString());
 }
 
 sol();
