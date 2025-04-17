@@ -15,31 +15,20 @@ const input = require("fs").readFileSync(path).toString().trim().split("\n");
 function sol() {
   const [N, M] = input[0].split(" ").map(Number);
   const numbers = input[1].split(" ").map(Number);
-  const rangeList = [];
-  for (let i = 2; i < input.length; i++) {
-    rangeList.push(input[i].split(" "));
-  }
-
   const answer = [];
 
   //   누적합
-  //   index는 1부터 시작한다.
   const DP = Array(N + 1).fill(0);
 
-  DP[1] = numbers[0];
+  //   0부터 시작
+  numbers.map((v, index) => {
+    DP[index + 1] = DP[index] + v;
+  });
 
-  //  index 0  부터 시작
-  for (let index = 1; index <= N; index++) {
-    // DP 현재 인덱스 index+1
-    // DP  이전 인덱스 Index
-    DP[index + 1] = DP[index] + numbers[index];
-  }
-
-  for (let index = 0; index < M; index++) {
-    const [i, j] = rangeList[index];
-
+  input.slice(2).map((str) => {
+    const [i, j] = str.split(" ").map(Number);
     answer.push(DP[j] - DP[i - 1]);
-  }
+  });
 
   console.log(answer.join("\n"));
 }
