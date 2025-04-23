@@ -1,27 +1,25 @@
-const path = process.platform === "linux" ? "/dev/stdin" : "./input.txt";
-const input = require("fs")
-  .readFileSync(path)
+const [N, M] = require("fs")
+  .readFileSync("/dev/stdin")
   .toString()
   .trim()
   .split(" ")
   .map(Number);
 
-const comb = (n, k) => {
-  const dp = Array.from({ length: n + 1 }, () => Array(n + 1).fill(BigInt(0)));
+function comb(N, M) {
+  const DP = Array.from({ length: M + 1 }, () => Array(N + 2).fill(BigInt(0)));
 
-  for (let i = 0; i <= n; i++) {
-    dp[i][0] = BigInt(1); // nC0 = 1
-    dp[i][i] = BigInt(1); // nCn = 1
+  // DP[0][*] = 1 (빈 조합은 항상 1개)
+  for (let i = 0; i <= N + 1; i++) {
+    DP[0][i] = BigInt(1);
   }
 
-  for (let i = 1; i <= n; i++) {
-    for (let j = 1; j < i; j++) {
-      dp[i][j] = dp[i - 1][j - 1] + dp[i - 1][j];
+  for (let len = 1; len <= M; len++) {
+    for (let start = N; start >= 1; start--) {
+      DP[len][start] = DP[len][start + 1] + DP[len - 1][start + 1];
     }
   }
 
-  return dp[n][k].toString();
-};
+  console.log(DP[M][1].toString());
+}
 
-const [N, M] = input;
-console.log(comb(N, M));
+comb(N, M);
