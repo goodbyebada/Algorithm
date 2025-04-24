@@ -11,29 +11,21 @@ let T = +input[0];
 // Map.has(key) +1, 아니라면 map.set()
 
 function sol() {
-  let n = 1;
-  let pos;
-  let end;
   let answer = [];
+  let index = 1;
 
   while (T--) {
     const map = new Map();
-    pos = +input[n];
+    const n = +input[index];
 
-    end = n + pos + 1;
-    // 포함 X
-    // slice 원본 배열 안 건듬, start, end
-    // start 생략 시 0으로 간주
-    const list = input.slice(n, end);
+    // N(N의 인덱스) | (N의 인덱스)+1 <= index <= (N의 인덱스) + N
+    const end = index + n;
+    index++;
 
-    for (let i = 1; i < list.length; i++) {
-      const key = list[i].split(" ")[1];
-
-      if (map.has(key)) {
-        map.set(key, map.get(key) + 1);
-        continue;
-      }
-      map.set(key, 1);
+    while (index <= end) {
+      const key = input[index].split(" ")[1];
+      map.set(key, (map.get(key) || 0) + 1);
+      index++;
     }
 
     let sum = 1;
@@ -41,8 +33,6 @@ function sol() {
       sum *= count + 1;
     }
     answer.push(sum - 1);
-
-    n = end;
   }
 
   console.log(answer.join("\n"));
