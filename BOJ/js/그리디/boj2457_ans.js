@@ -18,35 +18,44 @@ flowers.sort((a, b) => {
 const start = 301;
 const end = 1130;
 
-let count = 0;
-let currentEnd = start;
-let index = 0;
+// 마지막에 count 갱신
+function solution(flowers, start, end) {
+  let count = 0;
+  let currEnd = start;
+  let flag = false;
+  let index = 0;
+  const n = flowers.length;
+  let maxEnd = currEnd;
 
-while (currentEnd <= end) {
-  let maxEnd = currentEnd;
+  // 핵심은 가아아아아아아아아아장 넓은 범위를 꽃을 찾는것이다.
+  // nextstart가 <= currEnd 이면서 가질 수 있는 개개ㅐ개넓은 Maxend를 탐색한다.
+  // index < n 을 만족하면서
+  //MaxEnd를 currEnd로 재정의한다.
+  // currEnd === maxEnd (업데이트 된 것이 없다면) => 멈춰! count 0
+  // 업데이트 되었다면 count++
 
-  // n개 전부 순회
-  // 현재 end보다 전에 피어야함
-  // 가장 늦게 지는 꽃 찾기 🌸
+  // currEnd <= end 일때까지만 위를 반복한다.
+  //currEnd > end이면 더 이상 탐색할 필요없다.
 
-  while (index < n && flowers[index].start <= currentEnd) {
-    if (flowers[index].end > maxEnd) {
-      maxEnd = flowers[index].end;
+  while (currEnd <= end) {
+    let maxEnd = currEnd;
+
+    while (index < n && flowers[index].start <= currEnd) {
+      if (maxEnd < flowers[index].end) {
+        maxEnd = flowers[index].end;
+      }
+      index++;
     }
-    index++;
+
+    if (maxEnd === currEnd) {
+      return 0;
+    }
+
+    count++;
+    currEnd = maxEnd;
   }
 
-  // 찾지 못함 -> 0 출력
-  if (maxEnd == currentEnd) {
-    console.log(0);
-    return;
-  }
-
-  // 찾음 end 업데이트
-  currentEnd = maxEnd;
-
-  // 개수 세어준다.
-  count++;
+  return count;
 }
 
-console.log(count);
+console.log(solution(flowers, start, end));
