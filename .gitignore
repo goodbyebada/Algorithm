@@ -15,4 +15,6 @@ codeTree/.DS_Store
 codeTree/.clang-format
 .DS_Store
 *.txt
-testOfCoding
+testOfCoding/*
+BOJ/js/답확인시참고.md
+BOJ/js/test.js
