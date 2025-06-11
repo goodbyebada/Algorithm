@@ -39,33 +39,31 @@ function rotate90(arr) {
   return newArr;
 }
 
+// 4방향의 proportion 초기화
+// 좌측 기준으로
+// 좌 -> 하 -> 우 -> 상
 const proportions = [p];
 for (let i = 0; i < 3; i++) {
   proportions.push(rotate90(proportions[i]));
 }
 
-// 알파 위치 (토네이도 방향에 따라 모래 남은 위치)
-const alphas = [
-  [2, 1],
-  [3, 2],
-  [2, 3],
-  [1, 2],
-];
-
 function solution() {
   let outerSand = 0;
   let tr = sr;
   let tc = sc;
-  let curl = 0;
-  let turn = 2;
-  let now = 0;
+  let dirIndex = 0;
+  let count_max = 1;
+  let count = 0;
+  let flag = 0;
   let proportion = proportions[0];
 
   while (!(tr === 0 && tc === 0)) {
     // 1. 토네이도 이동
-    tr += dir[curl][0];
-    tc += dir[curl][1];
-    now += 1;
+    tr += dir[dirIndex][0];
+    tc += dir[dirIndex][1];
+
+    // 한 방향에 대한 거리 이동
+    count += 1;
 
     // 옮겨놓고 sand 있던 자리 초기화
     let sand = data[tr][tc];
@@ -95,11 +93,8 @@ function solution() {
     }
 
     // 3. 알파 위치에 남은 모래 이동
-    // const ar = tr + alphas[curl][0] - 2;
-    // const ac = tc + alphas[curl][1] - 2;
-    const ar = tr + dir[curl][0];
-    const ac = tc + dir[curl][1];
-
+    const ar = tr + dir[dirIndex][0];
+    const ac = tc + dir[dirIndex][1];
     if (ar >= 0 && ar < N && ac >= 0 && ac < N) {
       data[ar][ac] += left;
     } else {
@@ -107,17 +102,19 @@ function solution() {
     }
 
     // 4. 방향 회전 여부
-    if (now === Math.floor(turn / 2) || now === turn) {
-      curl = (curl + 1) % 4;
-      proportion = proportions[curl];
+    if (count === count_max) {
+      // 방향 이동
+      dirIndex = (dirIndex + 1) % 4;
+      //   새로운 이동 시작
+      count = 0;
+      //   방향에 따른 비율 이동
+      proportion = proportions[dirIndex];
 
-      if (now === turn) {
-        // 0으로 초기화
-        now = 0;
-
-        // 2씩 증가
-        //길이는 계속 확장
-        turn += 2;
+      //   두 방향 바뀔때마다 count_max 업데이트
+      if (flag === 0) flag = 1;
+      else {
+        flag = 0;
+        count_max += 1;
       }
     }
   }
