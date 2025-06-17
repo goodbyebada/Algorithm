@@ -40,27 +40,37 @@ function calcDist(shops, homes) {
   return dist;
 }
 
-function findMinDist(dist, M) {
+function findMinDist(shops, homes, M) {
   let MIN = Infinity;
-  const count = dist.length;
-  const homeCount = dist[0].length;
-  // const used = Array(count).fill(false);
   const stack = [];
 
   function backTracking(start, depth) {
     // 수행한다.
     if (depth === M) {
-      let nowMin = 0;
-      for (let home = 0; home < homeCount; home++) {
-        nowMin += calcMyChickDist(dist, home, stack);
-        if (nowMin > MIN) break;
+      let sum = 0;
+
+      for (let home = 0; home < homes.length; home++) {
+        // nowMin += calcMyChickDist(shops, homes, home, stack);
+        let dist = Infinity;
+        for (let shop of stack) {
+          dist = Math.min(
+            Math.abs(shops[shop][0] - homes[home][0]) +
+              Math.abs(shops[shop][1] - homes[home][1]),
+            dist
+          );
+        }
+
+        sum += dist;
+
+        if (sum > MIN) break;
       }
 
-      if (nowMin < MIN) MIN = nowMin;
+      if (sum < MIN) MIN = sum;
       return;
     }
 
-    for (let i = start; i < count; i++) {
+    // stack 이용해 조합 구하기 ✨
+    for (let i = start; i < shops.length; i++) {
       stack.push(i);
       backTracking(i + 1, depth + 1);
       stack.pop();
@@ -106,8 +116,8 @@ function sol(input) {
   }
 
   // findPos(map, N, shops, homes);
-  const dist = calcDist(shops, homes);
-  const MIN = findMinDist(dist, M);
+  // const dist = calcDist(shops, homes);
+  const MIN = findMinDist(shops, homes, M);
   console.log(MIN);
 }
 
