@@ -35,7 +35,6 @@ function drop(board) {
 // bfs => 하나씩!
 function bfs(startX, startY, board, visited) {
   const targetChar = board[startX][startY];
-
   const stack = [[startX, startY]];
   visited[startX][startY] = 1;
 
@@ -80,24 +79,19 @@ function sol(input) {
   const board = input.map((line) => line.split(""));
   let answer = 0;
 
-  let cantPop = false;
-
-  // 의외로 헷갈렸던 부분 ⛑️
   while (1) {
-    // 초기화
-    drop(board);
-    cantPop = false;
-
-    //
+    // 한 판
     const visited = Array(R)
       .fill(0)
       .map(() => Array(C).fill(0));
 
-    // 한 판
+    let cantPop = false;
+
     for (let row = 0; row < R; row++) {
       for (let col = 0; col < C; col++) {
-        // 뿌요찾음
-        if (board[row][col] !== EMPTY) {
+        // 중복 방지 가능! 시간 단축 🔑
+
+        if (board[row][col] !== EMPTY && !visited[row][col]) {
           // pop 가능함
           if (bfs(row, col, board, visited)) {
             cantPop = true;
@@ -108,6 +102,7 @@ function sol(input) {
 
     if (!cantPop) break;
 
+    drop(board);
     answer++;
   }
 
