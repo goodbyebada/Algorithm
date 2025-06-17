@@ -1,3 +1,5 @@
+// 1H 10M 골드 4
+
 const path = process.platform === "linux" ? "/dev/stdin" : "./input.txt";
 const input = require("fs").readFileSync(path).toString().trim().split("\n");
 const dirs = [
@@ -12,14 +14,8 @@ const C = 6;
 
 const EMPTY = ".";
 
-function show(board) {
-  board.forEach((row) => console.log(row.join("")));
-}
-
 // 1. 다른 값이 나올때까지 바닥을 하강
 function drop(board) {
-  // 각 열마다 .을 제외한 뿌요 리스트를 만든다.
-
   for (let col = 0; col < C; col++) {
     const list = [];
     for (let row = 0; row < R; row++) {
@@ -32,18 +28,13 @@ function drop(board) {
       if (idx >= 0) board[row][col] = list[idx--];
       else board[row][col] = EMPTY;
     }
-
-    // show(board);
   }
 }
 
 // 2. 순회하며 뿌요가 있는지 확인, => 뿌요 같은 색 4개 이상 상하좌우 연결 탐색
 // bfs => 하나씩!
-function bfs(startX, startY, board) {
+function bfs(startX, startY, board, visited) {
   const targetChar = board[startX][startY];
-  const visited = Array(R)
-    .fill(0)
-    .map(() => Array(C).fill(0));
 
   const stack = [[startX, startY]];
   visited[startX][startY] = 1;
@@ -82,8 +73,7 @@ function pop(board, stack) {
   }
 }
 
-// 4. 여러 그룹이 발견되어도 1연쇄 +1
-// 5. 1로 돌아간다. 뿌요가 발견되지 않을때까지
+// 4. 1로 돌아간다. 뿌요가 발견되지 않을때까지
 
 function sol(input) {
   // 문자열은 immutable 👹
@@ -92,10 +82,16 @@ function sol(input) {
 
   let cantPop = false;
 
+  // 의외로 헷갈렸던 부분 ⛑️
   while (1) {
     // 초기화
     drop(board);
     cantPop = false;
+
+    //
+    const visited = Array(R)
+      .fill(0)
+      .map(() => Array(C).fill(0));
 
     // 한 판
     for (let row = 0; row < R; row++) {
@@ -103,7 +99,7 @@ function sol(input) {
         // 뿌요찾음
         if (board[row][col] !== EMPTY) {
           // pop 가능함
-          if (bfs(row, col, board)) {
+          if (bfs(row, col, board, visited)) {
             cantPop = true;
           }
         }
