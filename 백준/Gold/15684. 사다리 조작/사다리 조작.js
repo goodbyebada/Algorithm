@@ -1,95 +1,78 @@
 const path = process.platform === "linux" ? "/dev/stdin" : "./input.txt";
-const input = require("fs").readFileSync(path).toString().trim().split("\n");
+const input = require("fs")
+  .readFileSync(path)
+  .toString()
+  .trim()
+  .split("\n")
+  .map((e) => e.trim());
 
-// 입력 파싱
-const [n, m, h] = input[0].split(" ").map(Number); // n: 세로선 개수, m: 기존 가로선 개수, h: 가로선을 놓을 수 있는 위치 수
+const [n, m, h] = input.shift().split(" ").map(Number);
+const ladders = input.map((e) => e.split(" ").map(Number));
 
-// 맵 초기화: [1][1] ~ [h][n] 사용
-const map = Array.from({ length: h + 1 }, () => Array(n + 1).fill(0));
+const map = Array.from({ length: h + 1 }, () =>
+  Array.from({ length: n + 1 }, () => false)
+);
 
-// 상수 정의
-const EMPTY = 0,
-  RIGHT = 1,
-  LEFT = 2;
+let answer = Infinity;
 
-let finished = false;
-let minCnt = -1;
-
-// 입력된 가로선 정보 등록
-for (let i = 1; i <= m; i++) {
-  const [a, b] = input[i].split(" ").map(Number);
-  map[a][b] = RIGHT;
-  map[a][b + 1] = LEFT;
+for (let [a, b] of ladders) {
+  // 방향성 통일하기 위해 b에만 표시한다.
+  map[a][b] = true;
 }
 
+const check = () => {
+  for (let i = 1; i <= n; i++) {
+    let idx = i;
+    // 각 열마다 검사한다.
+    // 가로 선의 길이만 보면 된다
 
-function backtrack(y, x, addedCnt, finishCnt) {
-  // 조건 만족한 해를 찾은 경우 더 이상 탐색하지 않음
-  if (finished) return;
-
-  // 가로선을 목표 개수만큼 추가했으면 검사
-  if (addedCnt === finishCnt) {
-    if (checkAllVLines()) {
-      finished = true; // 성공 플래그
+    for (let j = 1; j <= h; j++) {
+      // 오른쪽으로 이동
+      if (map[j][idx]) idx++;
+      // 왼쪽으로 이동
+      else if (map[j][idx - 1]) idx--;
     }
+
+    if (idx !== i) return false;
+  }
+  return true;
+};
+
+const dfs = (depth, max) => {
+  // 가지치기 어차피 3 이상이면 안됨
+  if (answer <= max) return;
+
+  if (max === depth) {
+    // 바꾸고 나서 검사한다. (0도 포함되어있어서 안 바뀌었을떄도 검사)
+    // 가지 치기  => answer > depth ~ 시간 단축 & 갱신
+    if (check() && answer > depth) answer = depth;
     return;
   }
 
-  // 가능한 위치에 가로선 추가 시도
-  for (let i = y; i <= h; i++) {
-    for (let j = i === y ? x : 1; j < n; j++) {
-      // 가로선 두 칸이 비어 있어야 가로선 추가 가능
-      if (map[i][j] === EMPTY && map[i][j + 1] === EMPTY) {
-        // 가로선 추가
-        map[i][j] = RIGHT;
-        map[i][j + 1] = LEFT;
+  // j == col
+  for (let j = 1; j < n; j++) {
+    // 사다리는 왼쪽에서 오른쪽으로 연결되는 방식으로 놓을 예정이니 n - 1까지 진행
+    // ✨ 방향 고정 & 인덱스 에러 안남 (1부터 Index 시작 & n-1까지만 진행)
 
-        // 다음 칸으로 백트래킹 (j + 2로 넘김: 인접 가로선 방지)
-        backtrack(i, j + 2, addedCnt + 1, finishCnt);
+    // 새로운 가로선을 놓는 과정
+    for (let i = 1; i <= h; i++) {
+      // 이미 연결되어있거나, 좌우 인접하게 붙어있다면 가로선 못 놓는다.
+      if (map[i][j] || map[i][j - 1] || map[i][j + 1]) continue;
 
-        // 되돌리기 (백트래킹)
-        map[i][j] = EMPTY;
-        map[i][j + 1] = EMPTY;
-      }
+      map[i][j] = true;
+      dfs(depth + 1, max);
+      map[i][j] = false;
+
+      // 아래로 내려간다.
+      // 행이 인덱스 범위안에 있고 & 가로선이 없을때 (안 되는 조건)
+      while (i <= h && !map[i][j + 1] && !map[i][j - 1]) i++;
     }
   }
+};
+
+// 최대 3개니까
+for (let i = 0; i < 4; i++) {
+  dfs(0, i);
 }
 
-/**
- * 모든 세로선 검사
- * 각 세로선이 시작 위치와 같은 위치로 도착하는지 확인
- */
-function checkAllVLines() {
-  for (let vLineIdx = 1; vLineIdx <= n; vLineIdx++) {
-    if (!checkVLine(vLineIdx)) return false;
-  }
-  return true;
-}
-
-/**
- * 특정 세로선 검사
- * 출발한 세로선에서 시작해 아래로 내려가며 좌우 이동을 시뮬레이션
- */
-function checkVLine(start) {
-  let x = start;
-  for (let y = 1; y <= h; y++) {
-    if (map[y][x] === RIGHT) x++;
-    else if (map[y][x] === LEFT) x--;
-  }
-  return x === start; // 도착한 위치가 출발한 위치와 같아야 함
-}
-
-// N- queens 처럼 고정해놓고 시작 (1,1)
-// 추가 가로선 수 0 ~ 3개까지 시도
-for (let finishCnt = 0; finishCnt <= 3; finishCnt++) {
-  backtrack(1, 1, 0, finishCnt); // 초기 위치부터 탐색 시작
-
-  // ✨ 가장 작은 것부터 실행하니까 빨리 끝났다면 정답임
-  if (finished) {
-    minCnt = finishCnt; // 정답 갱신
-    break;
-  }
-}
-
-// 출력
-console.log(minCnt);
+console.log(answer === Infinity ? -1 : answer);
