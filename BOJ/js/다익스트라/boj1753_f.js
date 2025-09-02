@@ -109,16 +109,21 @@ function ds(startNode, graph, table) {
   //    반복한다.
 
   while (!queue.isEmpty()) {
+    // minHeap -> top은 최단 거리
     const curr = queue.pop();
     const currVal = curr.v;
     const currDist = curr.dist;
 
+    // table에 있는 값이 더 작다 == currDist 이전의 레거시값이다.
     if (table[currVal] < currDist) continue;
 
     for (let adjNode of graph[currVal]) {
       const currAdjDist = table[currVal] + adjNode.dist;
+
+      // 최단거리 발견 ! => table 갱신
       if (table[adjNode.v] > currAdjDist) {
         table[adjNode.v] = currAdjDist;
+
         queue.push(new Node(currAdjDist, adjNode.v));
       }
     }
