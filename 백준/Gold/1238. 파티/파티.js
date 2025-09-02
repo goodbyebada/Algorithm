@@ -5,15 +5,26 @@ let index = 0;
 
 //  N M X (목표 지점)
 // 계속 최단 거리만 갱신할 것이니까
+
 const [N, M, X] = input[index++].split(" ").map(Number);
+
+// 기존에 했던 풀이 -> 각 학생 집 출발점으로 설정해 다익스트라 수행
+// 🌟 역방향 그래프로 만든다면, 다익스트라 2번으로 로직 끝
+//   역방향 그래프로 만든다면 도착점에서 다익스트라 수행한다면 각 학생 집 -> 도착점으로의 최단거리 갱신!
+//  A -> 도착점  => A <- 도착점 방향이 바뀌기 때문이다.
 
 const graph = Array(N + 1)
   .fill(0)
   .map(() => []);
 
+const reverseGraph = Array(N + 1)
+  .fill(0)
+  .map(() => []);
+
 for (let i = 1; i < M + 1; i++) {
   const [start, end, t] = input[i].split(" ").map(Number);
-  graph[start].push({ end, t });
+  graph[start].push({ vertex: end, t });
+  reverseGraph[end].push({ vertex: start, t });
 }
 
 class MinHeap {
@@ -108,14 +119,13 @@ function ds(start, graph, table) {
     // 최단 거리 노드
     const { vertex: nowVertex, dist } = heap.pop();
 
-    // { end, t }
     for (let adjNode of graph[nowVertex]) {
-      const { end, t } = adjNode;
+      const { vertex, t } = adjNode;
 
-      if (table[end] > dist + t) {
+      if (table[vertex] > dist + t) {
         // 갱신
-        table[end] = dist + t;
-        heap.push({ dist: table[end], vertex: end });
+        table[vertex] = dist + t;
+        heap.push({ dist: table[vertex], vertex });
       }
     }
   }
@@ -128,18 +138,18 @@ function main() {
   // 각 학생의 돌아가는 길
   ds(X, graph, backTable);
 
-  // 나머지 학생들이 집에 거리 갱신
-  for (let i = 0; i < graph.length; i++) {
-    if (i === X) continue;
-
-    const table = Array(N + 1).fill(Infinity);
-    ds(i, graph, table);
-    backTable[i] += table[X];
-  }
+  // 도착점에서 출발 => 학생 집 노드의 최단 거리 갱신
+  const table = Array(N + 1).fill(Infinity);
+  ds(X, reverseGraph, table);
 
   let maxDist = -1;
-  for (let dist of backTable) {
-    if (dist === Infinity || dist === 0) continue;
+
+  for (let i = 1; i < N + 1; i++) {
+    const dist = backTable[i] + table[i];
+
+    if (Number.isNaN(dist)) continue;
+    if (dist === 0) continue;
+
     if (dist > maxDist) {
       maxDist = dist;
     }
