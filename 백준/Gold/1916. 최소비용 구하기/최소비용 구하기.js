@@ -41,8 +41,11 @@ function dijks(start, dist) {
   while (mh.arr.length > 0) {
     const [node, cost] = mh.pop();
 
+    // 레거시 값이기 때문에
+    if (dist[node] < cost) continue;
+
     for (let i = 1; i < N + 1; i++) {
-      if (i === node || graph[node][i] === Infinity) continue;
+      if (graph[node][i] === Infinity) continue;
       //   node 전까지의 거리 +  graph[node][i] (node-i 거리)
       const nextCost = cost + graph[node][i];
 
