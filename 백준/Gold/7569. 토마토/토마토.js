@@ -11,32 +11,34 @@
 const path = process.platform === "linux" ? "/dev/stdin" : "./input.txt";
 const input = require("fs").readFileSync(path).toString().trim().split("\n");
 
-let index = 0;
-const [M, N, H] = input[index++].split(" ").map(Number);
-const box = [];
+const [M, N, H] = input.shift().split(" ").map(Number);
+const dx = [-1, 1, 0, 0, 0, 0]; // 좌,우,상,하,앞,뒤일 때 x좌표
+const dy = [0, 0, -1, 1, 0, 0]; // 좌,우,상,하,앞,뒤일 때 y좌표
+const dz = [0, 0, 0, 0, -1, 1]; // 좌,우,상,하,앞,뒤일 때 z좌표 (상자 인덱스)
+const box = Array.from(Array(H), () =>
+  Array.from(Array(N), () => Array.from(Array(M).fill(0)))
+);
+
 const q = [];
 let answer = 0;
-
 let unripeTomato = 0;
 
 // box init
-for (let h = 0; h < H; h++) {
-  let layer = [];
-  for (let n = 0; n < N; n++) {
-    layer.push(input[index++].split(" ").map(Number));
+// for (let h = 0; h < H; h++) {
+//   let layer = [];
+//   for (let n = 0; n < N; n++) {
+//     layer.push(input[index++].split(" ").map(Number));
+//   }
+
+//   box.push(layer);
+// }
+
+// 3차원 배열에 입력값 삽입
+for (let i = 0; i < H; i++) {
+  for (let j = 0; j < N; j++) {
+    box[i][j] = input.shift().split(" ").map(Number);
   }
-
-  box.push(layer);
 }
-
-const dirs = [
-  [0, 1, 0],
-  [0, 0, 1],
-  [0, -1, 0],
-  [0, 0, -1],
-  [1, 0, 0],
-  [-1, 0, 0],
-];
 
 function checkUnripeTomato() {
   for (let i = 0; i < H; i++) {
@@ -57,12 +59,17 @@ function bfs() {
   let index = 0;
 
   while (q.length > index) {
-    const [h, r, c, d] = q[index++];
+    const [z, x, y, d] = q[index++];
 
-    for (let dir of dirs) {
-      const ch = h + dir[0];
-      const cr = r + dir[1];
-      const cc = c + dir[2];
+    // for (let dir of dirs) {
+    //   const ch = h + dir[0];
+    //   const cr = r + dir[1];
+    //   const cc = c + dir[2];
+
+    for (let i = 0; i < 6; i++) {
+      const cr = x + dx[i];
+      const cc = y + dy[i];
+      const ch = z + dz[i];
 
       if (ch < 0 || ch >= H) continue;
       if (cr < 0 || cr >= N) continue;
