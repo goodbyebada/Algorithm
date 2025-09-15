@@ -3,6 +3,27 @@ const { execSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 
+// 파일명에서 숫자만 추출하는 함수
+function extractFirstNumber(fileName) {
+  const match = fileName.match(/\d+/);
+  return match ? match[0] : null;
+}
+
+// Set 사용 (고유한 문제 번호만 필요한 경우)
+function getBojProblemInfoUnique(fileNames) {
+  const uniqueProblems = new Set();
+
+  fileNames.forEach((fileName) => {
+    const pn = extractFirstNumber(fileName);
+
+    if (pn) {
+      uniqueProblems.add(pn); // Set은 add()만 사용
+    }
+  });
+
+  return uniqueProblems;
+}
+
 try {
   // 커밋 메시지 확인
   const commitMsg = execSync("git log -1 --pretty=%B", {
@@ -39,7 +60,6 @@ try {
   // files.forEach((file) => console.log(`  - ${file}`));
 
   // 동적 폴더명 생성: YYYY/YYYY.M월-N주차
-
   const targetDir = path.join(
     gitRoot,
     `${year}`,
@@ -48,17 +68,30 @@ try {
 
   console.log(`📁 대상 폴더: ${targetDir}`);
 
-  // 폴더 생성
-  if (!fs.existsSync(targetDir)) {
+  // 폴더 존재 여부 확인 및 예외 처리
+  if (fs.existsSync(targetDir)) {
+    // 폴더가 이미 존재하고 파일이 있는지 확인
+    const existingFiles = fs.readdirSync(targetDir);
+    if (existingFiles.length > 0) {
+      console.log(`📁 폴더가 이미 존재하고 파일이 있습니다: ${targetDir}`);
+      console.log(
+        `⚠️  이미 복사했습니다. (기존 파일 ${existingFiles.length}개)`
+      );
+      console.log(`\n기존 파일들:`);
+      existingFiles.forEach((file) => console.log(`  - ${file}`));
+      process.exit(0);
+    } else {
+      console.log(`📁 폴더는 존재하지만 비어있습니다: ${targetDir}`);
+    }
+  } else {
     fs.mkdirSync(targetDir, { recursive: true });
     console.log(`📁 폴더 생성 완료: ${targetDir}`);
-  } else {
-    console.log(`📁 폴더 이미 존재: ${targetDir}`);
   }
 
-  // 파일 복사
+  // 파일 복사 및 BOJ 정보 수집
   let successCount = 0;
   let failCount = 0;
+  const copiedFiles = []; // 성공적으로 복사된 파일명들
 
   files.forEach((file) => {
     const srcPath = path.join(gitRoot, file);
@@ -72,11 +105,19 @@ try {
     }
 
     const destPath = path.join(targetDir, path.basename(file));
+    const fileName = path.basename(file);
 
     try {
       fs.copyFileSync(srcPath, destPath);
-      console.log(`📄 복사 완료: ${path.basename(file)}`);
+      console.log(`📄 복사 완료: ${fileName}`);
       successCount++;
+      copiedFiles.push(fileName); // 성공한 파일명 저장
+
+      // 파일 복사와 동시에 문제 번호 확인
+      const problemNumber = extractFirstNumber(fileName);
+      if (problemNumber) {
+        console.log(`   🔢 문제 번호 감지: ${problemNumber}`);
+      }
     } catch (error) {
       console.log(`❌ 파일 복사 실패: ${file}`);
       console.log(`   오류: ${error.message}`);
@@ -84,9 +125,25 @@ try {
     }
   });
 
+  // BOJ 문제 정보 수집 및 출력
+  const uniqueProblems = getBojProblemInfoUnique(copiedFiles);
+
   console.log(`\n🎉 작업 완료!`);
   console.log(`  ✅ 성공: ${successCount}개`);
   console.log(`  ❌ 실패: ${failCount}개`);
+
+  // BOJ 문제 정보 출력
+  if (uniqueProblems.size > 0) {
+    const sortedProblems = Array.from(uniqueProblems).sort(
+      (a, b) => parseInt(a) - parseInt(b)
+    );
+    console.log(
+      `\n문제 : ${sortedProblems.map((num) => `${num}번`).join(", ")}`
+    );
+    console.log(`총 푼 문제 : ${uniqueProblems.size}개`);
+  } else {
+    console.log(`\n문제 번호가 포함된 파일이 없습니다.`);
+  }
 
   if (successCount > 0) {
     console.log(`\n📂 복사된 파일 위치: ${targetDir}`);
