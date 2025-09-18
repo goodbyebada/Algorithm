@@ -1,13 +1,15 @@
 function solution(triangle) {
-    const depth = triangle.length;
-    const dp = triangle.map(row => [...row]); // 깊은 복사
+    const n = triangle.length;
+    if (n === 1) return triangle[0][0];
     
-    for(let d = 0; d < depth - 1; d++){
-        for(let i = 0; i < triangle[d].length; i++){
-            dp[d+1][i] = Math.max(dp[d+1][i], dp[d][i] + triangle[d+1][i]);
-            dp[d+1][i+1] = Math.max(dp[d+1][i+1], dp[d][i] + triangle[d+1][i+1]);
+    for (let i = n - 2; i >= 0; i--) {
+        const row = triangle[i];
+        const nextRow = triangle[i + 1];
+        
+        for (let j = 0, len = row.length; j < len; j++) {
+            row[j] += nextRow[j] > nextRow[j + 1] ? nextRow[j] : nextRow[j + 1];
         }
     }
     
-    return Math.max(...dp[depth-1]);
+    return triangle[0][0];
 }
